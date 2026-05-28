@@ -1,177 +1,136 @@
-# 🗃️ Base de Datos — Conflictos Armados
+# ConflictosArmados — Base de Datos y Aplicación de Escritorio
 
-Base de datos relacional diseñada para modelar y gestionar información sobre conflictos armados a nivel mundial, incluyendo grupos armados, líderes, armamento, traficantes, organizaciones mediadoras y países involucrados.
+Proyecto académico de bases de datos que modela, almacena y gestiona información sobre conflictos armados a nivel mundial. Incluye el diseño de la base de datos relacional, scripts SQL completos y una aplicación de escritorio Java con interfaz gráfica para consultar y administrar los datos.
 
 ---
 
-## 📋 Contenido del repositorio
+## Tecnologías utilizadas
+
+| Capa | Tecnología |
+|---|---|
+| Base de datos | Microsoft SQL Server |
+| Lenguaje de aplicación | Java (Swing) |
+| IDE | Apache NetBeans |
+| Driver de conexión | JDBC (`mssql-jdbc`) |
+
+---
+
+## Estructura del proyecto
 
 ```
-Entrega/
-├── conflicto.sql                          # Script DDL — creación del esquema completo
-├── Diccionario de datos.xlsx              # Diccionario de datos
-├── ImagenDiseñoConflicto.jpg              # Diagrama entidad-relación
-├── proyectoConflictos.zip                 # Proyecto empaquetado
-├── sql llenado bd/                        # Scripts de inserción de datos
-│   ├── InsertConflictos.sql
-│   ├── insertPaises.sql
-│   ├── insertGruposArmados.sql
-│   ├── InsertArmas.sql
-│   ├── insertOrganizaciones.sql
-│   ├── insertLideresMilitares.sql
-│   ├── insertLideresPoliticos.sql
-│   ├── insertDivisiones.sql
-│   ├── insertEtnias.sql
-│   ├── insertEspecializaciones.sql
-│   ├── insertDialogos.sql
-│   ├── insertTraficantes.sql
-│   ├── InsertTraficantesArmas.sql
-│   ├── insertSuministros.sql
-│   ├── InsertConflictos_Grupos.sql
-│   ├── InsertConflictos_OrganizacionesMediadoras.sql
-│   ├── InsertConflictos_Paises.sql
-│   └── insertRegionesUotroNoDependientes.sql
-└── trigger-vistas-procedimiento/          # Objetos adicionales de BD
-    ├── PA_TOTAL_BAJAS.sql                 # Procedimiento almacenado
-    ├── TRG_CONFLICTOS_INSERT.sql          # Trigger de inserción
-    ├── TRG_CONFLICTOS_UPDATE.sql          # Trigger de actualización
-    ├── VISTA 1 4-TABLAS.sql
-    ├── VISTA 2 3-TABLAS.sql
-    └── VISTA 3 4-TABLAS.sql
+Proyecto BD Conflictos/
+└── Entrega/
+    ├── Creacion BD_CONFLICTOS.sql               # DDL: creación de tablas y relaciones
+    ├── Llenado de BD_CONFLICTOS.sql             # DML: datos de prueba
+    ├── Diccionario de datos.xlsx                # Documentación de cada tabla y campo
+    ├── ImagenDiseñoConflicto.jpg                # Diagrama entidad-relación (ER)
+    ├── trigger-vistas-procedimiento/
+    │   ├── TRG_CONFLICTOS_INSERT.sql            # Trigger de auditoría en INSERT
+    │   ├── TRG_CONFLICTOS_UPDATE.sql            # Trigger de auditoría en UPDATE
+    │   ├── VISTA 1 4-TABLAS.sql                 # Vista: conflictos, grupos y líderes políticos
+    │   ├── VISTA 2 3-TABLAS.sql                 # Vista: traficantes y armas
+    │   ├── VISTA 3 4-TABLAS.sql                 # Vista: conflictos y organizaciones mediadoras
+    │   └── PA_TOTAL_BAJAS.sql                   # Procedimiento almacenado: total de bajas por grupo
+    └── ConflictosArmadosApp/
+        └── src/
+            ├── conexion/
+            │   └── Conexion.java                # Clase de conexión JDBC a SQL Server
+            └── formularios/
+                ├── FrmMenu.java / .form         # Menú principal
+                ├── FrmConflictos.java / .form   # CRUD de conflictos
+                ├── FrmEditarConflicto.java / .form  # Edición de un conflicto
+                └── FrmProcedimiento.java / .form    # Ejecución del procedimiento almacenado
 ```
 
 ---
 
-## 🧱 Estructura de la base de datos
+## Modelo de datos
 
-La base de datos `ConflictosArmados` cuenta con **30 tablas** organizadas en los siguientes módulos:
+La base de datos `ConflictosArmados` contiene **30 tablas** que cubren:
 
-### Entidades principales
-
-| Tabla | Descripción |
-|---|---|
-| `CONFLICTOS` | Registro de conflictos con nombre, número de muertos y heridos |
-| `PAISES` | Países del mundo involucrados en conflictos |
-| `GRUPOS_ARMADOS` | Grupos armados participantes |
-| `ORGANIZACIONES_MEDIADORAS` | ONGs, organismos internacionales y entidades gubernamentales |
-| `TRAFICANTES` | Traficantes de armas |
-| `ARMAS` | Armamento con nivel destructivo asociado |
-| `NIVELES_DESTRUCTIVOS` | Clasificación del nivel de destrucción de un arma (1–5) |
-
-### Tipos de conflicto (herencia)
-
-| Tabla | Descripción |
-|---|---|
-| `CONFLICTOS_TERRITORIALES` | Conflictos por disputas de territorio |
-| `CONFLICTOS_RELIGIOSOS` | Conflictos motivados por diferencias religiosas |
-| `CONFLICTOS_ECONOMICOS` | Conflictos por recursos y materias primas |
-| `CONFLICTOS_RACIALES` | Conflictos de origen racial o étnico |
-
-### Estructura militar
-
-| Tabla | Descripción |
-|---|---|
-| `DIVISIONES` | Divisiones por grupo armado (barcos, tanques, aviones, hombres, bajas) |
-| `LIDERES_MILITARES` | Líderes militares con rango y división asignada |
-| `LIDERES_POLITICOS` | Líderes políticos por grupo armado |
-
-### Tablas de relación y clasificación
-
-`CONFLICTOS_PAISES`, `CONFLICTOS_GRUPOS_ARMADOS`, `CONFLICTOS_ORGANIZACIONES_MEDIADORAS`, `CONFLICTOS_TERRITORIALES_REGIONES`, `CONFLICTOS_RELIGIOSOS_RELIGIONES`, `CONFLICTOS_ECONOMICOS_MATERIAS_PRIMAS`, `CONFLICTOS_RACIALES_ETNIAS`, `TRAFICANTES_ARMAS`, `SUMINISTROS`, `ORGANIZACIONES_MEDIADORAS_LIDERES_POLITICOS`
+- **Conflictos** — entidad principal con nombre, número de muertos y heridos. Se especializa en cuatro subtipos: *territorial*, *religioso*, *económico* y *racial*.
+- **Países y Regiones** — territorios involucrados en cada conflicto.
+- **Grupos armados y Divisiones** — unidades militares con inventario de armas, tanques, barcos, aviones y registro de bajas.
+- **Líderes políticos y militares** — con jerarquía entre ellos.
+- **Organizaciones mediadoras** — ONGs, organismos internacionales, etc., con tipo y posible dependencia entre sí.
+- **Armas, Niveles destructivos y Traficantes** — gestión del tráfico de armamento hacia los grupos.
+- **Suministros** — relación entre grupo armado, traficante y arma suministrada.
+- **Ayudas** — tipo de apoyo que una organización mediadora aporta a un conflicto.
+- **Bitácora de conflictos** — tabla de auditoría poblada automáticamente por los triggers.
 
 ---
 
-## 📊 Datos de ejemplo incluidos
-
-Los scripts de inserción cargan datos reales y de prueba, entre ellos:
-
-- **50 conflictos** — Guerra Rusia-Ucrania, Guerra Civil Siria, Conflicto Israel-Palestina, entre otros
-- **50 países** — desde Colombia y Venezuela hasta Rusia, China y Japón
-- **50 grupos armados** — Fuerzas Armadas de Ucrania, Talibanes, Hamas, FARC-EP, Boko Haram, etc.
-- **50 armas** — desde pistolas hasta tanques M1 Abrams, sistemas HIMARS y drones Bayraktar TB2
-- **50 organizaciones mediadoras** — ONU, Cruz Roja, Médicos Sin Fronteras, OTAN, entre otras
-
----
-
-## ⚙️ Objetos de base de datos
-
-### Procedimiento almacenado — `SP_TOTAL_BAJAS`
-Calcula el **total de bajas por grupo armado** sumando las bajas de todas sus divisiones mediante un cursor. Retorna una tabla con `codigo_grupo_armado`, `nombre_grupo` y `total_bajas`.
-
-```sql
-EXEC SP_TOTAL_BAJAS;
-```
+## Objetos de base de datos
 
 ### Triggers
 
-| Trigger | Evento | Acción |
+| Nombre | Evento | Descripción |
 |---|---|---|
-| `TRG_CONFLICTOS_INSERT` | `AFTER INSERT` en `CONFLICTOS` | Registra el nuevo conflicto en la tabla `BITACORA_CONFLICTOS` |
-| `TRG_CONFLICTOS_UPDATE` | `AFTER UPDATE` en `CONFLICTOS` | Registra la actualización con fecha en `BITACORA_CONFLICTOS` |
+| `TRG_CONFLICTOS_INSERT` | AFTER INSERT en `CONFLICTOS` | Registra en `BITACORA_CONFLICTOS` cada nuevo conflicto con la observación "Nuevo conflicto registrado". |
+| `TRG_CONFLICTOS_UPDATE` | AFTER UPDATE en `CONFLICTOS` | Registra en `BITACORA_CONFLICTOS` los cambios realizados sobre un conflicto. |
 
 ### Vistas
 
-| Vista | Tablas involucradas | Descripción |
+| Nombre | Tablas involucradas | Descripción |
 |---|---|---|
-| Vista 1 | 4 tablas | Conflictos con sus grupos armados y líderes políticos |
-| Vista 2 | 3 tablas | Traficantes con las armas que suministran y cantidades |
-| Vista 3 | 4 tablas | Conflictos con organizaciones mediadoras y tipo de ayuda |
+| Vista 1 | `CONFLICTOS`, `CONFLICTOS_GRUPOS_ARMADOS`, `GRUPOS_ARMADOS`, `LIDERES_POLITICOS` | Lista cada conflicto con su grupo armado y líder político asociado. |
+| Vista 2 | `TRAFICANTES`, `TRAFICANTES_ARMAS`, `ARMAS` | Muestra qué armas y en qué cantidad maneja cada traficante. |
+| Vista 3 | `CONFLICTOS`, `CONFLICTOS_ORGANIZACIONES_MEDIADORAS`, `ORGANIZACIONES_MEDIADORAS`, `AYUDAS` | Detalla qué organizaciones participan en cada conflicto, el tipo de ayuda y el personal desplegado. |
+
+### Procedimiento almacenado
+
+**`SP_TOTAL_BAJAS`** — Recorre con un cursor todas las divisiones de cada grupo armado y acumula el total de bajas por grupo, devolviendo un resumen con `codigo_grupo_armado`, `nombre_grupo` y `total_bajas`.
 
 ---
 
-## 🚀 Instalación y uso
+## Aplicación de escritorio
 
-### Requisitos
+La aplicación Java Swing permite interactuar con la base de datos sin escribir SQL manualmente.
 
-- **SQL Server** (cualquier edición, 2016 o superior recomendado)
-- SQL Server Management Studio (SSMS) u otro cliente compatible
+### Formularios
 
-### Pasos
-
-1. Crear la base de datos:
-   ```sql
-   CREATE DATABASE ConflictosArmados;
-   USE ConflictosArmados;
-   ```
-
-2. Ejecutar el script de estructura:
-   ```
-   conflicto.sql
-   ```
-
-3. Poblar la base de datos ejecutando los scripts en la carpeta `sql llenado bd/` en el siguiente orden sugerido:
-   ```
-   insertPaises.sql
-   insertGruposArmados.sql
-   InsertArmas.sql
-   insertOrganizaciones.sql
-   InsertConflictos.sql
-   insertDivisiones.sql
-   insertLideresPoliticos.sql
-   insertLideresMilitares.sql
-   insertTraficantes.sql
-   InsertTraficantesArmas.sql
-   ... (resto de relaciones)
-   ```
-
-4. Ejecutar los objetos de la carpeta `trigger-vistas-procedimiento/`.
+- **FrmMenu** — pantalla de inicio con acceso a los dos módulos principales.
+- **FrmConflictos** — lista todos los conflictos en una tabla estilo Excel; permite agregar y seleccionar un registro para editar.
+- **FrmEditarConflicto** — edición de los campos de un conflicto existente (nombre, muertos, heridos) con validación y confirmación.
+- **FrmProcedimiento** — ejecuta `SP_TOTAL_BAJAS` y muestra el resultado del total de bajas por grupo armado.
 
 ---
 
-## 📐 Diagrama ER
+## Configuración y ejecución
 
-El diagrama entidad-relación del diseño se encuentra en:
+### 1. Base de datos
 
+1. Abrir **SQL Server Management Studio** (o similar).
+2. Ejecutar `Creacion BD_CONFLICTOS.sql` para crear la base de datos y todas las tablas.
+3. Ejecutar `Llenado de BD_CONFLICTOS.sql` para insertar los datos de prueba.
+4. Ejecutar los scripts de la carpeta `trigger-vistas-procedimiento/` para crear los triggers, vistas y procedimiento almacenado.
+
+### 2. Aplicación Java
+
+1. Abrir el proyecto `ConflictosArmadosApp` en **Apache NetBeans**.
+2. Agregar el driver JDBC de SQL Server (`mssql-jdbc-*.jar`) a las librerías del proyecto.
+3. Verificar los parámetros de conexión en `src/conexion/Conexion.java`:
+
+```java
+String usuario = "sa";
+String password = "123456";
+String bd      = "ConflictosArmados";
+// Host: localhost, Puerto: 1433
 ```
-Entrega/ImagenDiseñoConflicto.jpg
-```
+
+4. Compilar y ejecutar el proyecto (`Run Project`).
+
+> **Nota:** Si se cambian las credenciales de SQL Server, actualizar los valores correspondientes en `Conexion.java` antes de compilar.
 
 ---
 
-## 📖 Diccionario de datos
+## Autores
 
-La descripción detallada de cada tabla, sus atributos, tipos de datos y restricciones está documentada en:
+Proyecto desarrollado como entrega académica para la materia de Bases de Datos.
 
-```
-Entrega/Diccionario de datos.xlsx
-```
+- **Royman Orozco**
+- **Samuel Guzman**
+- **Juan Cayon**
+ 
+
+Fecha de entrega: **28 de mayo de 2026**
